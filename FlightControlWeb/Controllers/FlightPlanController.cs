@@ -30,9 +30,17 @@ namespace FlightControlWeb.Controllers
         [HttpGet("{id}", Name = "Get")]
         public FlightPlan GetFlightPlanById(string id)
         {
-            string request = Request.QueryString.Value;
-            bool internRequest = request.Contains("?");
-            return flightsManager.GetFlightPlanById(id, internRequest);
+            //string request = Request.QueryString.Value;
+            //bool internRequest = request.Contains("internal");
+            if ((id.Last() == '&'))
+            {
+                id = id.Remove(id.Length - 1);
+                return flightsManager.GetFlightPlanById(id, true);
+            }
+            else
+            {
+                return flightsManager.GetFlightPlanById(id, false);
+            }
         }
 
         // POST: api/FlightPlan

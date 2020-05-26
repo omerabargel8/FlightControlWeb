@@ -42,6 +42,7 @@ function addMarker(id, lat, lng, selected) {
     marker.addListener('click', function () {
         markedRowId = id;
         markerClick(id);
+        showFlightDetails();
     });
 }
 function markerClick(id) {
@@ -67,17 +68,26 @@ function rowClick(row) {
     let lat = markersDic[markedRowId].position.lat;
     let lng = markersDic[markedRowId].position.lng;
     delete markersDic[markedRowId];
-    addMarker(markedRowId, lat,lng, true);
+    addMarker(markedRowId, lat, lng, true);
+    showFlightDetails();
 }
 function showFlightDetails() {
     let panelHeading = document.getElementById("panelHeading");
     let panelBody = document.getElementById("panelBody");
-    if (markedRowId = "rand") {
+    if (markedRowId == "rand") {
         panelHeading.textContent = "Please choose a flight to view more details";
         panelBody = "";
+    } else {
+        console.log("BBB");
+        let fp = findFlightPlan(markedRowId);
+        console.log("QQQQ {0}", fp.company_name);
     }
 }
 function findFlightPlan(id) {
-    let flightsUrl = "../api/FlightPlan/" + id + "?";
-    $.getJSON(flightsUrl, function (data) { });   
+    let flightsUrl = "../api/FlightPlan/" + id + "&";
+    $.getJSON(flightsUrl, function (data) {
+        FlightPlan = data;
+        console.log("QQQQ {0}", FlightPlan.company_name);
+        return FlightPlan;
+    });   
 }
