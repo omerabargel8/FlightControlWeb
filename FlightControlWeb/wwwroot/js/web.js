@@ -15,13 +15,15 @@
         icon: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png'
     });
 }
+/**
 async function blaa() {
     let flightsUrl = "../api/flights";
     $.getJSON(flightsUrl, function (data) {
-        $('#flight_table tr:gt(0)').remove()
+        $('#internalFlightTable tr:gt(0)').remove()
         data.forEach(function (flight) {
             console.log(flight);
             //$("#flight_table").append("<tr><td>" + flight.flight_id + "</td>" + "<td>" + flight.company_name + "</td>" + "<td>" + flight.is_extetanl + "</td></tr>");
         });
     });
 }
+*/

@@ -1,7 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace FlightControlWeb.Models
@@ -10,16 +15,17 @@ namespace FlightControlWeb.Models
     {
         private static ConcurrentDictionary<string, FlightPlan> flightPlans = new ConcurrentDictionary<string, FlightPlan>();
         private static ConcurrentDictionary<string, Flight> flights = new ConcurrentDictionary<string, Flight>();
-        private static ConcurrentDictionary<string, Server> servers = new ConcurrentDictionary<string, Server>();
+        private static ConcurrentDictionary<string, Server> servers = new ConcurrentDictionary<string, Server>(); 
+        private static ConcurrentDictionary<string, string> externalFlights = new ConcurrentDictionary<string, string>();
         private static Random random = new Random();
 
         public FlightsManager()
         {
-            flights["69"] = new Flight { Flight_id = "69", Longitude = 0, Latitude = 0, Passengers = 3, Company_name = "omer airlines", Data_time = new DateTime(2020, 3, 1, 7, 0, 0), Is_extetanl = false };
+            flights["69"] = new Flight { Flight_id = "69", Longitude = 0, Latitude = 0, Passengers = 3, Company_name = "omer airlines", Date_time = new DateTime(2020, 3, 1, 7, 0, 0), Is_extetanl = false };
             List<Segment> segments1 = new List<Segment>();
             segments1.Add(new Segment { Longitude = 70, Latitude = 70, Timespan_Seconds = 950 });
             segments1.Add(new Segment { Longitude = 75, Latitude = 75.34, Timespan_Seconds = 55000 });
-            segments1.Add(new Segment { Longitude = 80, Latitude = 80, Timespan_Seconds = 100000 });
+            segments1.Add(new Segment { Longitude = 80, Latitude = 80, Timespan_Seconds = 400000 });
             flightPlans["69"] = new FlightPlan
             {
                 Segments = segments1,
@@ -27,34 +33,19 @@ namespace FlightControlWeb.Models
                 Company_name = "OrelFlightsLtd",
                 Initial_location = new InitialLocation { Longitude = 50, Latitude = 50, Date_time = new DateTime(2020, 5, 24, 7, 0, 0) }
             };
+            Server s = new Server { ServerId = "123", ServerURL = "http://ronyut3.atwebpages.com/ap2" };
+            Server s2 = new Server { ServerId = "124", ServerURL = "http://ronyut4.atwebpages.com/ap2" };
+
+            servers[s.ServerId] = s;
+            servers[s2.ServerId] = s2;
 
         }
-            /**
-                    private static List<Flight> Flights = new List<Flight>()
-                    {
-                        new Flight{ Flight_id=69, Longitude=0,  Latitude=0, Passengers=3, Company_name= "omer airlines", Data_time= new DateTime(2020, 3, 1, 7, 0, 0), Is_extetanl=false }
-                    };
-
-
-
-                    private static List<Segment> segments1 = new List<Segment>()
-                        {
-                            new Segment{Longitude=70,Latitude=70,Timespan_Seconds=950 },
-                            new Segment{Longitude=75,Latitude=75.34,Timespan_Seconds=550 },
-                            new Segment{Longitude=80,Latitude=80,Timespan_Seconds=1000 }
-                    };
-                    private static List<FlightPlan> flightPlans = new List<FlightPlan>()
-                    {
-                        new FlightPlan{ Segments = segments1, Passengers = 120, CompanyName = "OrelFlightsLtd",
-                            InitialLocation = new InitialLocation { Longitude = 50, Latitude = 50, DateTime = new DateTime(2020, 3, 1, 7, 0, 0) } }
-                    };
-                */
        
         public void addFlightPlan(FlightPlan fp)
         {
             string id = RandomString(6);
             flightPlans[id] = fp;
-            flights[id] = new Flight { Flight_id = id, Latitude = fp.Initial_location.Latitude, Longitude = fp.Initial_location.Longitude, Passengers = fp.Passengers, Data_time = fp.Initial_location.Date_time, Is_extetanl = fp.IsExtetanl, Company_name = fp.Company_name };
+            flights[id] = new Flight { Flight_id = id, Latitude = fp.Initial_location.Latitude, Longitude = fp.Initial_location.Longitude, Passengers = fp.Passengers, Date_time = fp.Initial_location.Date_time, Is_extetanl = fp.IsExtetanl, Company_name = fp.Company_name };
         }
         public void deleteFlight(string id) 
         {
@@ -66,6 +57,8 @@ namespace FlightControlWeb.Models
         public List<Flight> getAllFlights(string relative_to, bool isExternals) 
         {
             List<Flight> flightsInTime = new List<Flight>();
+            if (isExternals)
+                flightsInTime = getFlightFromServers(relative_to);
             DateTime relativeTime = DateTime.Parse(relative_to);
             foreach (var flight in flightPlans)
             {
@@ -77,13 +70,15 @@ namespace FlightControlWeb.Models
                 }
                 if (endtime > relativeTime && initial < relativeTime)
                 {
+                    flightsInTime.Add(flights[flight.Key]);
+                    /**
                     if(isExternals)
                         flightsInTime.Add(flights[flight.Key]);
 
                     if(isExternals == false && flight.Value.IsExtetanl == false)
                         flightsInTime.Add(flights[flight.Key]);
+                    */
                 }
-                Console.WriteLine("blaa");
             }
     
             return flightsInTime;
@@ -116,6 +111,43 @@ namespace FlightControlWeb.Models
         {
             Server s = servers[id];
             servers.TryRemove(id, out s);
+        }
+        public List<Flight> getFlightFromServers(string relative_to)
+        {
+            string path;
+            string responseFromServer;
+            List<Flight> tempFlights = new List<Flight>();
+            List<Flight> flights = new List<Flight>();
+            foreach (var server in servers)
+            {
+                path = server.Value.ServerURL + "/api/Flights?relative_to=" + relative_to;
+                WebRequest request = WebRequest.Create(path);
+                try
+                {
+                    WebResponse response = request.GetResponse();
+                    // Get the stream containing content returned by the server.
+                    // The using block ensures the stream is automatically closed.
+                    using (Stream dataStream = response.GetResponseStream())
+                    {
+                        // Open the stream using a StreamReader for easy access.
+                        StreamReader reader = new StreamReader(dataStream);
+                        responseFromServer = reader.ReadToEnd();
+                    }
+                    tempFlights = JsonConvert.DeserializeObject<List<Flight>>(responseFromServer);
+                    foreach (var flight in tempFlights)
+                    {
+                        flight.Is_extetanl = true;
+                        //flights[flight.Flight_id] = flight;
+                        bool b = externalFlights.TryAdd(flight.Flight_id, server.Value.ServerURL);
+                    }
+                    flights.AddRange(tempFlights);
+                    tempFlights.Clear();
+                } catch(Exception e)
+                {
+                    Console.WriteLine("Could not receive data from {0}", server.Value.ServerURL);
+                }
+            }
+            return flights;
         }
 
     }

@@ -22,7 +22,7 @@ namespace FlightControlWeb.Controllers
         public IEnumerable<Flight> GetAllFlights(string relative_to)
         {
             string request = Request.QueryString.Value;
-            bool isExternals = request.Contains("sync_all");
+            bool isExternals = request.Contains("sync_all"); 
             return flightsManager.getAllFlights(relative_to, isExternals);
         }
 

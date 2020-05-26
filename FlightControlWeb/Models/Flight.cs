@@ -12,7 +12,7 @@ namespace FlightControlWeb.Models
         public double Latitude { get; set; }
         public int Passengers { get; set; }
         public string Company_name { get; set; }
-        public DateTime Data_time { get; set; }
+        public DateTime Date_time { get; set; }
         public bool Is_extetanl { get; set; }
     }
 }
