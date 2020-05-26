@@ -12,51 +12,51 @@
     <link href="css/style.css" rel="stylesheet" type="text/css">
 </head>
 <body>
-    <div class="container-fluid">
+    <div class="container-fluid" style="position:absolute">
         <div class="row">
             <div class="col-md-7">
                 <div id="map">
                 </div>
-                <h6>
+                <h2>
                     flight details
-                </h6>
-                <div>
-                    <textarea id="w3mission" rows="6" cols="92">
-                    </textarea>
+                </h2>
+                <div class="panel panel-default">
+                    <div id ="panelHeading" class="panel-heading">Panel Heading</div>
+                    <div id ="panelBody" class="panel-body">Panel Content</div>
                 </div>
             </div>
             <div class="col-md-5">
-                <div class="row" style="height: 50%">
-                    <div class="float-right" style="width: 100%">
-                        <h2>My Flights</h2>
-                        <table id="internalFlightTable" class="table">
-                            <thead>
-                                <tr>
-                                    <th>Flight ID</th>
-                                    <th>Airline</th>
-                                    <th>Is External</th>
-                                </tr>
-                            </thead>
-                            <tbody id="internalBody"></tbody>
-                        </table>
+                <div class="row" style="height:300px; overflow:auto">
+                        <div class="float-right" style="width: 100%">
+                            <h2>My Flights</h2>
+                            <table id="internalFlightTable" class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Flight ID</th>
+                                        <th>Airline</th>
+                                        <th>Is External</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="internalBody" style="overflow:scroll"></tbody>
+                            </table>
+                        </div>
+                 </div>
+                    <div class="row" style="height: 300px; overflow:auto">
+                            <div class="float-right" style="width: 100%">
+                                <h2>External Flights</h2>
+                                <table id="externalFlightTable" class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Flight ID</th>
+                                            <th>Airline</th>
+                                            <th>Is External</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="externalBody" style="overflow:scroll"></tbody>
+                                </table>
+                            </div>
                     </div>
                 </div>
-                <div class="row" style="height: 50%">
-                    <div class="float-right" style="width: 100%">
-                        <h2>External Flights</h2>
-                        <table id="externalFlightTable" class="table">
-                            <thead>
-                                <tr>
-                                    <th>Flight ID</th>
-                                    <th>Airline</th>
-                                    <th>Is External</th>
-                                </tr>
-                            </thead>
-                            <tbody id="externalBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
     <script>
@@ -68,12 +68,21 @@
                 $('#internalBody').empty();
                 $('#externalBody').empty();
                 data.forEach(function (flight) {
-                    if (flight.is_extetanl) 
-                        $("#externalFlightTable").append("<tr><td>" + flight.flight_id + "</td>" + "<td>" + flight.company_name + "</td>" + "<td>" + flight.is_extetanl + "</td></tr>");
-                    else
-                        $("#internalFlightTable").append("<tr><td>" + flight.flight_id + "</td>" + "<td>" + flight.company_name + "</td>" + "<td>" + flight.is_extetanl + "</td></tr>");
+                    addMarker(flight.flight_id, flight.latitude, flight.longitude, false);
+                    if (flight.is_extetanl) {
+                        if (markedRowId == flight.flight_id) 
+                            $("#externalFlightTable").append('<tr onClick="rowClick(this)" style="background-color:aquamarine"><td>' + flight.flight_id + "</td>" + "<td>" + flight.company_name + "</td>" + "<td>" + flight.is_extetanl + "</td></tr>");
+                         else
+                            $("#externalFlightTable").append('<tr onClick="rowClick(this)"><td>' + flight.flight_id + "</td>" + "<td>" + flight.company_name + "</td>" + "<td>" + flight.is_extetanl + "</td></tr>");
+                    } else {
+                        if (markedRowId == flight.flight_id)
+                            $("#internalFlightTable").append('<tr onClick="rowClick(this)" style="background-color:aquamarine"><td>' + flight.flight_id + "</td>" + "<td>" + flight.company_name + "</td>" + "<td>" + flight.is_extetanl + "</td></tr>");
+                        else
+                            $("#internalFlightTable").append('<tr onClick="rowClick(this)"><td>' + flight.flight_id + "</td>" + "<td>" + flight.company_name + "</td>" + "<td>" + flight.is_extetanl + "</td></tr>");
+                    }
                 });
             });
+
         }
             , 2000);
     </script>

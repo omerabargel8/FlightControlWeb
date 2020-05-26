@@ -14,7 +14,7 @@ namespace FlightControlWeb.Models
         List<Server> getAllServers();
         void addFlightPlan(FlightPlan fp);
         void addServer(Server s);
-        FlightPlan GetFlightPlanById(string id);
+        FlightPlan GetFlightPlanById(string id, bool internRequest);
         void deleteServer(string id);
     }
 }

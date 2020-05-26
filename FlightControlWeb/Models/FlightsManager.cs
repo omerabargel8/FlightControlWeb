@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace FlightControlWeb.Models
@@ -33,8 +32,8 @@ namespace FlightControlWeb.Models
                 Company_name = "OrelFlightsLtd",
                 Initial_location = new InitialLocation { Longitude = 50, Latitude = 50, Date_time = new DateTime(2020, 5, 24, 7, 0, 0) }
             };
-            Server s = new Server { ServerId = "123", ServerURL = "http://ronyut3.atwebpages.com/ap2" };
-            Server s2 = new Server { ServerId = "124", ServerURL = "http://ronyut4.atwebpages.com/ap2" };
+            Server s = new Server { ServerId = "123", ServerURL = "http://ronyut3.atwebpages.com" };
+            Server s2 = new Server { ServerId = "124", ServerURL = "http://ronyut4.atwebpages.com" };
 
             servers[s.ServerId] = s;
             servers[s2.ServerId] = s2;
@@ -84,9 +83,49 @@ namespace FlightControlWeb.Models
             return flightsInTime;
         }
 
-        public FlightPlan GetFlightPlanById(string id)
+        public FlightPlan GetFlightPlanById(string id, bool internRequest)
         {
-            return flightPlans[id];
+            string path, responseFromServer;
+            if (internRequest)
+            {
+                if (flightPlans.ContainsKey(id))
+                    return flightPlans[id];
+                else
+                {
+                    if (externalFlights.ContainsKey(id))
+                    {
+
+                        path = externalFlights[id] + "/api/FlightPlan/" + id;
+                        WebRequest request = WebRequest.Create(path);
+                        try
+                        {
+                            WebResponse response = request.GetResponse();
+                            // Get the stream containing content returned by the server.
+                            // The using block ensures the stream is automatically closed.
+                            using (Stream dataStream = response.GetResponseStream())
+                            {
+                                // Open the stream using a StreamReader for easy access.
+                                StreamReader reader = new StreamReader(dataStream);
+                                responseFromServer = reader.ReadToEnd();
+                            }
+                            FlightPlan fp = JsonConvert.DeserializeObject<FlightPlan>(responseFromServer);
+                            return fp;
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Could not receive data from {0}", externalFlights[id]);
+                            return null;
+                        }
+                    }
+                    else return null;
+                }
+            }
+        else
+            {
+                if (flightPlans.ContainsKey(id))
+                    return flightPlans[id];
+                else return null;
+            }
         }
         public static string RandomString(int length)
         {
