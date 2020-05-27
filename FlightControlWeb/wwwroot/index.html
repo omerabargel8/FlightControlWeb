@@ -70,7 +70,8 @@
                 $('#internalBody').empty();
                 $('#externalBody').empty();
                 data.forEach(function (flight) {
-                    addMarker(flight.flight_id, flight.latitude, flight.longitude, false);
+                    //addMarker(flight.flight_id, flight.latitude, flight.longitude, false);
+                    addMarker(flight.flight_id, flight.latitude, flight.longitude);
                     if (flight.is_extetanl) {
                         if (markedRowId == flight.flight_id) 
                             $("#externalFlightTable").append('<tr onClick="rowClick(this)" style="background-color:aquamarine"><td>' + flight.flight_id + "</td>" + "<td>" + flight.company_name + "</td>" + "<td>" + flight.is_extetanl + "</td></tr>");
@@ -86,7 +87,7 @@
             });
 
         }
-            , 2000);
+            , 1000);
     </script>
 </body>
 </html>

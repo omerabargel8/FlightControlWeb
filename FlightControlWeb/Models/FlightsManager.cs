@@ -20,17 +20,17 @@ namespace FlightControlWeb.Models
 
         public FlightsManager()
         {
-            flights["69"] = new Flight { Flight_id = "69", Longitude = 0, Latitude = 0, Passengers = 3, Company_name = "omer airlines", Date_time = new DateTime(2020, 3, 1, 7, 0, 0), Is_extetanl = false };
+            flights["69"] = new Flight { Flight_id = "69", Longitude = 40, Latitude = 40, Passengers = 3, Company_name = "omer airlines", Date_time = new DateTime(2020, 3, 1, 7, 0, 0), Is_extetanl = false };
             List<Segment> segments1 = new List<Segment>();
-            segments1.Add(new Segment { Longitude = 70, Latitude = 70, Timespan_Seconds = 950 });
-            segments1.Add(new Segment { Longitude = 75, Latitude = 75.34, Timespan_Seconds = 55000 });
+            segments1.Add(new Segment { Longitude = 50, Latitude = 50, Timespan_Seconds = 950 });
+            segments1.Add(new Segment { Longitude = 70, Latitude = 70, Timespan_Seconds = 55000 });
             segments1.Add(new Segment { Longitude = 80, Latitude = 80, Timespan_Seconds = 400000 });
             flightPlans["69"] = new FlightPlan
             {
                 Segments = segments1,
                 Passengers = 120,
                 Company_name = "OrelFlightsLtd",
-                Initial_location = new InitialLocation { Longitude = 50, Latitude = 50, Date_time = new DateTime(2020, 5, 24, 7, 0, 0) }
+                Initial_location = new InitialLocation { Longitude = 40, Latitude = 40, Date_time = new DateTime(2020, 5, 27, 7, 0, 0) }
             };
             Server s = new Server { ServerId = "123", ServerURL = "http://ronyut3.atwebpages.com" };
             Server s2 = new Server { ServerId = "124", ServerURL = "http://ronyut4.atwebpages.com" };
@@ -69,14 +69,8 @@ namespace FlightControlWeb.Models
                 }
                 if (endtime > relativeTime && initial < relativeTime)
                 {
+                    updatePosition(flight.Key, relativeTime);
                     flightsInTime.Add(flights[flight.Key]);
-                    /**
-                    if(isExternals)
-                        flightsInTime.Add(flights[flight.Key]);
-
-                    if(isExternals == false && flight.Value.IsExtetanl == false)
-                        flightsInTime.Add(flights[flight.Key]);
-                    */
                 }
             }
     
@@ -187,6 +181,35 @@ namespace FlightControlWeb.Models
                 }
             }
             return flights;
+        }
+        public void updatePosition(string id, DateTime relativeTime)
+        {
+            double fraction;
+            double newLat = flights[id].Latitude;
+            double newLng = flights[id].Longitude;
+            Segment prevSegment = new Segment { Latitude = flightPlans[id].Initial_location.Latitude, Longitude = flightPlans[id].Initial_location.Longitude, Timespan_Seconds = 0 };
+            DateTime startPoint = flightPlans[id].Initial_location.Date_time;
+            DateTime endPoint;
+            foreach (var segment in flightPlans[id].Segments)
+            {
+                endPoint = startPoint.AddSeconds(segment.Timespan_Seconds);
+                if (endPoint > relativeTime && startPoint < relativeTime)
+                {
+                    System.TimeSpan secondsPassed = relativeTime.Subtract(startPoint);
+                    fraction = secondsPassed.TotalSeconds / segment.Timespan_Seconds;
+                    Console.WriteLine("big {0} small {1}", segment.Timespan_Seconds, segment.Timespan_Seconds);
+                    Console.WriteLine("sasa {0}", fraction);
+                    newLat = fraction * (segment.Latitude - prevSegment.Latitude) + prevSegment.Latitude;
+                    newLng = fraction * (segment.Longitude - prevSegment.Longitude) + prevSegment.Longitude;
+                    break;
+                }
+                else {
+                    prevSegment = segment;
+                    startPoint = endPoint;
+                     }
+            }
+            flights[id].Latitude = newLat;
+            flights[id].Longitude = newLng;
         }
 
     }
