@@ -10,8 +10,11 @@ function initMap() {
     }
 
     // New map
-     map = new google.maps.Map(document.getElementById('map'), options);
-
+    map = new google.maps.Map(document.getElementById('map'), options);
+    google.maps.event.addListener(map, 'click', function () {
+        markedRowId = "rand";
+        showFlightDetails(markedRowId, "", "", "", "");
+    });
     // Add marker
     let marker = new google.maps.Marker({
         position: { lat: 42.4668, lng: -70.9495 },
@@ -42,7 +45,7 @@ function addMarker(id, lat, lng, selected) {
     marker.addListener('click', function () {
         markedRowId = id;
         markerClick(id);
-        showFlightDetails();
+        flightChoosen(id);
     });
 }
 function markerClick(id) {
@@ -69,25 +72,34 @@ function rowClick(row) {
     let lng = markersDic[markedRowId].position.lng;
     delete markersDic[markedRowId];
     addMarker(markedRowId, lat, lng, true);
-    showFlightDetails();
+    flightChoosen(markedRowId);
 }
-function showFlightDetails() {
+function flightChoosen(id) {
+    let flightsUrl = "../api/FlightPlan/" + id + "&";
+    $.getJSON(flightsUrl, function (data) {
+        showFlightDetails(id, data.passengers, data.company_name, data.initial_location.date_time, data.segments);
+        drawFlightRoute(data.initial_location, data.segments);
+    });
+}
+
+function showFlightDetails(id, passengers, company_name, date_time, segments) {
     let panelHeading = document.getElementById("panelHeading");
     let panelBody = document.getElementById("panelBody");
     if (markedRowId == "rand") {
         panelHeading.textContent = "Please choose a flight to view more details";
+        company_nameP.textContent = "";
+        passengersP.textContent = "";
+        take_offP.textContent = "";
+        landingP.textContent = "";
         panelBody = "";
     } else {
-        console.log("BBB");
-        let fp = findFlightPlan(markedRowId);
-        console.log("QQQQ {0}", fp.company_name);
+        panelHeading.textContent = "Flight: " + id; 
+        company_nameP.textContent = "Company Name: " + company_name;
+        passengersP.textContent = "Passengers: " + passengers;
+        take_offP.textContent = "Take off: " + date_time;
+        landingP.textContent = "Flight: " + date_time; 
     }
 }
-function findFlightPlan(id) {
-    let flightsUrl = "../api/FlightPlan/" + id + "&";
-    $.getJSON(flightsUrl, function (data) {
-        FlightPlan = data;
-        console.log("QQQQ {0}", FlightPlan.company_name);
-        return FlightPlan;
-    });   
+function drawFlightRoute() {
+
 }
