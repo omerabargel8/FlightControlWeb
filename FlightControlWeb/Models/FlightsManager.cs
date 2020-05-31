@@ -20,19 +20,21 @@ namespace FlightControlWeb.Models
 
         public FlightsManager()
         {
-            flights["69"] = new Flight { Flight_id = "69", Longitude = 40, Latitude = 40, Passengers = 3, Company_name = "omer airlines", Date_time = new DateTime(2020, 3, 1, 7, 0, 0), Is_extetanl = false };
+            /**
+            flights["DJ44JD"] = new Flight { Flight_id = "DJ44JD", Longitude = 40, Latitude = 40, Passengers = 3, Company_name = "omer airlines", Date_time = new DateTime(2020, 3, 1, 7, 0, 0), Is_extetanl = false };
             List<Segment> segments1 = new List<Segment>();
             segments1.Add(new Segment { Longitude = 50, Latitude = 50, Timespan_Seconds = 950 });
             segments1.Add(new Segment { Longitude = 70, Latitude = 70, Timespan_Seconds = 55000 });
-            segments1.Add(new Segment { Longitude = 80, Latitude = 80, Timespan_Seconds = 400000 });
-            flightPlans["69"] = new FlightPlan
+            segments1.Add(new Segment { Longitude = 80, Latitude = 80, Timespan_Seconds = 55000 });
+            flightPlans["DJ44JD"] = new FlightPlan
             {
                 Segments = segments1,
                 Passengers = 120,
                 Company_name = "OrelFlightsLtd",
-                Initial_location = new InitialLocation { Longitude = 40, Latitude = 40, Date_time = new DateTime(2020, 5, 27, 7, 0, 0) }
+                Initial_location = new InitialLocation { Longitude = 40, Latitude = 40, Date_time = new DateTime(2020, 5, 31, 7, 0, 0) }
             };
-            Server s = new Server { ServerId = "123", ServerURL = "http://ronyut3.atwebpages.com" };
+    */
+            Server s = new Server { ServerId = "123", ServerURL = "http://rony7.atwebpages.com" };
             Server s2 = new Server { ServerId = "124", ServerURL = "http://ronyut4.atwebpages.com" };
 
             servers[s.ServerId] = s;
@@ -45,13 +47,16 @@ namespace FlightControlWeb.Models
             string id = RandomString(6);
             flightPlans[id] = fp;
             flights[id] = new Flight { Flight_id = id, Latitude = fp.Initial_location.Latitude, Longitude = fp.Initial_location.Longitude, Passengers = fp.Passengers, Date_time = fp.Initial_location.Date_time, Is_extetanl = fp.IsExtetanl, Company_name = fp.Company_name };
+            Console.WriteLine("DDDDDD {0} XXXX {1}", flights.Count(), flightPlans.Count());
         }
         public void deleteFlight(string id) 
         {
-            Flight f = flights[id];
-            FlightPlan fp = flightPlans[id];
-            flights.TryRemove(id, out f);
-            flightPlans.TryRemove(id, out fp);
+            if (flights.ContainsKey(id)) {
+                Flight f = flights[id];
+                flights.TryRemove(id, out f);
+                FlightPlan fp = flightPlans[id];
+                flightPlans.TryRemove(id, out fp);
+            }
         }
         public List<Flight> getAllFlights(string relative_to, bool isExternals) 
         {
@@ -211,6 +216,5 @@ namespace FlightControlWeb.Models
             flights[id].Latitude = newLat;
             flights[id].Longitude = newLng;
         }
-
     }
 }

@@ -1,7 +1,9 @@
-﻿let map;
+﻿
+let map;
 var markersDic = {};
 var markedRowId = "rand";
 var flightPaths = {};
+
 function initMap() {
     // Map options
     let options = {
@@ -15,6 +17,7 @@ function initMap() {
         markedRowId = "rand";
         resetMarkers();
         showFlightDetails(markedRowId, "", "", "", "");
+        deleteFlightRoute();
     });
     // Add marker
     let marker = new google.maps.Marker({
@@ -73,7 +76,7 @@ function markerClick(id) {
         if (row.cells[0].innerHTML === id) {
             //delete this
             row.style.backgroundColor = "aquamarine";
-        } else 
+        } else
             row.style.backgroundColor = "white";
     }
     for (var i = 0, row; row = externalTable.rows[i]; i++) {
@@ -86,13 +89,29 @@ function markerClick(id) {
 }
 function rowClick(row) {
     markedRowId = row.cells[0].innerHTML;
-    let lat = markersDic[markedRowId].position.lat;
-    let lng = markersDic[markedRowId].position.lng;
+    console.log("###" + markedRowId);
+    //let lat = markersDic[markedRowId].position.lat;
+    //let lng = markersDic[markedRowId].position.lng;
     //delete markersDic[markedRowId];
     //addMarker(markedRowId, lat, lng, true);
     resetMarkers();
     changeMarkerIcon(markedRowId);
     flightChoosen(markedRowId);
+
+}
+function DeleteFlight(id) {
+    fetch("../api/Flights/" + id, {
+        method: 'DELETE',
+    });
+    markersDic[id].setMap(null);
+    delete markersDic[id];
+    for (var key in flightPaths) {
+        if (key == id) {
+            flightPaths[key].setMap(null);
+            delete flightPaths[id];
+        }
+    }
+    showFlightDetails("flightDeleted", null, null, null, null);
 }
 function flightChoosen(id) {
     let flightsUrl = "../api/FlightPlan/" + id + "&";
@@ -104,7 +123,7 @@ function flightChoosen(id) {
 function showFlightDetails(id, passengers, company_name, date_time, segments) {
     let panelHeading = document.getElementById("panelHeading");
     let panelBody = document.getElementById("panelBody");
-    if (markedRowId == "rand") {
+    if (markedRowId == "rand" || id == "flightDeleted") {
         panelHeading.textContent = "Please choose a flight to view more details";
         company_nameP.textContent = "";
         passengersP.textContent = "";
@@ -112,11 +131,12 @@ function showFlightDetails(id, passengers, company_name, date_time, segments) {
         landingP.textContent = "";
         panelBody = "";
     } else {
-        panelHeading.textContent = "Flight: " + id; 
+        var time = date_time.replace("T", "  ");
+        panelHeading.textContent = "Flight: " + id;
         company_nameP.textContent = "Company Name: " + company_name;
         passengersP.textContent = "Passengers: " + passengers;
-        take_offP.textContent = "Take off: " + date_time;
-        landingP.textContent = "Flight: " + date_time; 
+        take_offP.textContent = "Take off: " + time;
+        landingP.textContent = "Flight: " + date_time;
     }
 }
 function drawFlightRoute(id, initial_location, segments) {
@@ -125,7 +145,7 @@ function drawFlightRoute(id, initial_location, segments) {
         if (key == id) {
             exist = true;
             continue;
-        } else 
+        } else
             flightPaths[key].setMap(null);
     }
     if (exist == false) {
@@ -136,14 +156,14 @@ function drawFlightRoute(id, initial_location, segments) {
         }
         var flightPath = new google.maps.Polyline({
             path: flightPlanCoordinates,
-            geodesic: true,
+            geodesic: false,
             strokeColor: '#FF0000',
             strokeOpacity: 1.0,
             strokeWeight: 2
         });
         flightPaths[id] = flightPath;
         flightPath.setMap(map);
-    } else 
+    } else
         flightPaths[id].setMap(map);
 }
 function addMarker(id, lat, lng) {
@@ -192,6 +212,35 @@ function resetMarkers() {
     }
 }
 function updateMarkerPosition(id, lat, lng) {
-    console.log({ lat, lng });
+    // console.log({ lat, lng });
     markersDic[id].setPosition({ lat, lng });
+}
+function deleteFlightRoute() {
+    for (var key in flightPaths)
+        flightPaths[key].setMap(null);
+}
+function uploadFiles(files) {
+    for (i = 0; i < files.length; i++) {
+        (function (file) {
+            let fileReader = new FileReader();
+            fileReader.readAsText(file, 'utf-8');
+            fileReader.onload = function () { 
+                let jsonFile = JSON.parse(fileReader.result);
+                sendFile(jsonFile);   
+            };
+        })(files[i]);
+    }
+}
+function sendFile(file) {
+    let f = JSON.stringify(file);
+    $.ajax({
+        type: "POST",
+        url: "api/FlightPlan",
+        data: f,
+        contentType: "application/json",
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("unable to upload json file");
+        }
+
+    });
 }
