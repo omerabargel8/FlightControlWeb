@@ -15,17 +15,17 @@
     <div class="container-fluid" style="position:absolute">
         <div class="row">
             <div class="col-md-7">
-                <div id="map">
-                </div>
-                <h4 id="panelHeading">
-                    Please choose a flight to view more details
-                </h4>
-                <div class="panel panel-default">
-                    <div id="company_nameP" class="panel-body"></div>
-                    <div id="passengersP" class="panel-body"></div>
-                    <div id="take_offP" class="panel-body"></div>
-                    <div id="landingP" class="panel-body"></div>
-                </div>
+                <div id="map"></div>
+                    <h4 id="panelHeading">
+                        Please choose a flight to view more details
+                    </h4>
+                    <div class="panel panel-default">
+                        <div id="company_nameP" class="panel-body"></div>
+                        <div id="passengersP" class="panel-body"></div>
+                        <div id="take_offP" class="panel-body"></div>
+                        <div id="landingP" class="panel-body"></div>
+                    </div>
+                <div class="dropZone" id="dropzone"></div>
             </div>
             <div class="col-md-5">
                 <div class="row" style="height:300px; overflow:auto">
@@ -42,7 +42,6 @@
                         </table>
                     </div>
                 </div>
-                <div class="dropZone" id="dropzone">Drop files here to upload</div>
                 <div class="row" style="height: 300px; overflow:auto">
                     <div class="float-right" style="width: 100%">
                         <h2>External Flights</h2>
@@ -93,17 +92,17 @@
             var dropzone = document.getElementById('dropzone');
             dropzone.ondrop = function (e) {
                 e.preventDefault();
-                this.className = 'dropzone';
+                this.className = 'dropZone';
                 uploadFiles(e.dataTransfer.files);
             }
             dropzone.ondragover = function () {
-                this.className = 'dropzone dragover';
+                this.className = 'dropZone dragover';
                 return false;
-            };
+            }
             dropzone.ondragleave = function () {
-                this.className = 'dropzone';
+                this.className = 'dropZone';
                 return false;
-            };
+            }
         }());
     </script>
 </body>
