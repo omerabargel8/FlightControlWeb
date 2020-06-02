@@ -12,26 +12,17 @@ namespace FlightControlWeb.Controllers
     [ApiController]
     public class FlightPlanController : ControllerBase
     {
-        private IFlightsManager flightsManager = new FlightsManager();
+        //private IFlightsManager flightsManager = new FlightsManager();
+        private IFlightsManager flightsManager;
         public FlightPlanController(IFlightsManager flightsManager)
         {
             this.flightsManager = flightsManager;
         }
 
-        /**
-        // GET: api/FlightPlan
-        [HttpGet]
-        public IEnumerable<FlightPlan> Get()
-        {
-            return flightsManager.getAllFlightPlans();
-        }*/
-
         // GET: api/FlightPlan/5
         [HttpGet("{id}", Name = "Get")]
         public FlightPlan GetFlightPlanById(string id)
         {
-            //string request = Request.QueryString.Value;
-            //bool internRequest = request.Contains("internal");
             if ((id.Last() == '&'))
             {
                 id = id.Remove(id.Length - 1);
@@ -48,18 +39,6 @@ namespace FlightControlWeb.Controllers
         public void Post(FlightPlan fp)
         {
             flightsManager.addFlightPlan(fp);
-        }
-
-        // PUT: api/FlightPlan/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
         }
     }
 }

@@ -17,30 +17,15 @@ namespace FlightControlWeb.Models
         private static ConcurrentDictionary<string, Server> servers = new ConcurrentDictionary<string, Server>(); 
         private static ConcurrentDictionary<string, string> externalFlights = new ConcurrentDictionary<string, string>();
         private static Random random = new Random();
-
+/**
         public FlightsManager()
         {
-            /**
-            flights["DJ44JD"] = new Flight { Flight_id = "DJ44JD", Longitude = 40, Latitude = 40, Passengers = 3, Company_name = "omer airlines", Date_time = new DateTime(2020, 3, 1, 7, 0, 0), Is_extetanl = false };
-            List<Segment> segments1 = new List<Segment>();
-            segments1.Add(new Segment { Longitude = 50, Latitude = 50, Timespan_Seconds = 950 });
-            segments1.Add(new Segment { Longitude = 70, Latitude = 70, Timespan_Seconds = 55000 });
-            segments1.Add(new Segment { Longitude = 80, Latitude = 80, Timespan_Seconds = 55000 });
-            flightPlans["DJ44JD"] = new FlightPlan
-            {
-                Segments = segments1,
-                Passengers = 120,
-                Company_name = "OrelFlightsLtd",
-                Initial_location = new InitialLocation { Longitude = 40, Latitude = 40, Date_time = new DateTime(2020, 5, 31, 7, 0, 0) }
-            };
-    */
             Server s = new Server { ServerId = "123", ServerURL = "http://rony8.atwebpages.com" };
             Server s2 = new Server { ServerId = "124", ServerURL = "http://ronyut4.atwebpages.com" };
 
             servers[s.ServerId] = s;
             servers[s2.ServerId] = s2;
-
-        }
+        }*/
        
         public void addFlightPlan(FlightPlan fp)
         {
