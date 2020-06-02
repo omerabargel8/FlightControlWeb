@@ -1,5 +1,4 @@
-﻿
-let map;
+﻿let map;
 var markersDic = {};
 var markedRowId = "rand";
 var flightPaths = {};
@@ -89,7 +88,6 @@ function markerClick(id) {
 }
 function rowClick(row) {
     markedRowId = row.cells[0].innerHTML;
-    console.log("###" + markedRowId);
     //let lat = markersDic[markedRowId].position.lat;
     //let lng = markersDic[markedRowId].position.lng;
     //delete markersDic[markedRowId];
@@ -103,15 +101,7 @@ function DeleteFlight(id) {
     fetch("../api/Flights/" + id, {
         method: 'DELETE',
     });
-    markersDic[id].setMap(null);
-    delete markersDic[id];
-    for (var key in flightPaths) {
-        if (key == id) {
-            flightPaths[key].setMap(null);
-            delete flightPaths[id];
-        }
-    }
-    showFlightDetails("flightDeleted", null, null, null, null);
+    deleteFlightMarks(id);
 }
 function flightChoosen(id) {
     let flightsUrl = "../api/FlightPlan/" + id + "&";
@@ -120,9 +110,8 @@ function flightChoosen(id) {
         drawFlightRoute(id, data.initial_location, data.segments);
     });
 }
-function showFlightDetails(id, passengers, company_name, date_time, segments) {
+function showFlightDetails(id, passengers, company_name, initialTime, segments) {
     let panelHeading = document.getElementById("panelHeading");
-    let panelBody = document.getElementById("panelBody");
     if (markedRowId == "rand" || id == "flightDeleted") {
         panelHeading.textContent = "Please choose a flight to view more details";
         company_nameP.textContent = "";
@@ -131,12 +120,13 @@ function showFlightDetails(id, passengers, company_name, date_time, segments) {
         landingP.textContent = "";
         panelBody = "";
     } else {
-        var time = date_time.replace("T", "  ");
+        let landingTime = calculateLandingTime(initialTime, segments);
+        var takeOff = new Date(initialTime).toUTCString().substr(0, 25);
         panelHeading.textContent = "Flight: " + id;
         company_nameP.textContent = "Company Name: " + company_name;
         passengersP.textContent = "Passengers: " + passengers;
-        take_offP.textContent = "Take off: " + time;
-        landingP.textContent = "Flight: " + date_time;
+        take_offP.textContent = "Take off: " + takeOff;
+        landingP.textContent = "Landing Time: " + landingTime;
     }
 }
 function drawFlightRoute(id, initial_location, segments) {
@@ -243,4 +233,29 @@ function sendFile(file) {
         }
 
     });
+}
+function calculateLandingTime(initialTime, segments) {
+    let endlTime = new Date(initialTime);
+    segments.forEach(function (segment) {
+        endlTime.setSeconds(endlTime.getSeconds() + parseFloat(segment.timespan_Seconds));
+    })
+    return endlTime.toUTCString().substr(0, 25);
+}
+function deleteFlightMarks(id) {
+    markersDic[id].setMap(null);
+    delete markersDic[id];
+    for (var key in flightPaths) {
+        if (key == id) {
+            flightPaths[key].setMap(null);
+            delete flightPaths[id];
+        }
+    }
+    if (panelHeading.textContent == "Flight: " + id)
+        showFlightDetails("flightDeleted", null, null, null, null);
+}
+function deleteIrrelevantFlights(flights) {
+    for (var key in markersDic) {
+        if (!flights.some(flight => flight.flight_id === key))
+            deleteFlightMarks(key);
+    }
 }

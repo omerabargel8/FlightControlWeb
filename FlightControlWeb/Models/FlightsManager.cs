@@ -34,7 +34,7 @@ namespace FlightControlWeb.Models
                 Initial_location = new InitialLocation { Longitude = 40, Latitude = 40, Date_time = new DateTime(2020, 5, 31, 7, 0, 0) }
             };
     */
-            Server s = new Server { ServerId = "123", ServerURL = "http://rony7.atwebpages.com" };
+            Server s = new Server { ServerId = "123", ServerURL = "http://rony8.atwebpages.com" };
             Server s2 = new Server { ServerId = "124", ServerURL = "http://ronyut4.atwebpages.com" };
 
             servers[s.ServerId] = s;
@@ -44,10 +44,9 @@ namespace FlightControlWeb.Models
        
         public void addFlightPlan(FlightPlan fp)
         {
-            string id = RandomString(6);
+            string id = RandomString();
             flightPlans[id] = fp;
             flights[id] = new Flight { Flight_id = id, Latitude = fp.Initial_location.Latitude, Longitude = fp.Initial_location.Longitude, Passengers = fp.Passengers, Date_time = fp.Initial_location.Date_time, Is_extetanl = fp.IsExtetanl, Company_name = fp.Company_name };
-            Console.WriteLine("DDDDDD {0} XXXX {1}", flights.Count(), flightPlans.Count());
         }
         public void deleteFlight(string id) 
         {
@@ -63,7 +62,7 @@ namespace FlightControlWeb.Models
             List<Flight> flightsInTime = new List<Flight>();
             if (isExternals)
                 flightsInTime = getFlightFromServers(relative_to);
-            DateTime relativeTime = DateTime.Parse(relative_to);
+            DateTime relativeTime = DateTime.Parse(relative_to).ToUniversalTime();
             foreach (var flight in flightPlans)
             {
                 DateTime initial = flight.Value.Initial_location.Date_time;
@@ -126,11 +125,16 @@ namespace FlightControlWeb.Models
                 else return null;
             }
         }
-        public static string RandomString(int length)
+        public static string RandomString()
         {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            return new string(Enumerable.Repeat(chars, length)
+            string letters, numbers;
+            const string lettersChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const string numbersChars = "0123456789";
+            letters = new string(Enumerable.Repeat(lettersChars, 3)
             .Select(s => s[random.Next(s.Length)]).ToArray());
+            numbers = new string(Enumerable.Repeat(numbersChars, 3)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
+            return letters + numbers;
         }
         public List<Server> getAllServers()
         {

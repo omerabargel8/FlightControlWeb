@@ -63,10 +63,10 @@
         setInterval(function () {
             let date = new Date().toISOString().substr(0, 19) + "Z";
             let flightsUrl = "../api/flights?relative_to=" + date + "&sync_all";
-
             $.getJSON(flightsUrl, function (data) {
                 $('#internalBody').empty();
                 $('#externalBody').empty();
+                deleteIrrelevantFlights(data);
                 data.forEach(function (flight) {
                     addMarker(flight.flight_id, flight.latitude, flight.longitude);
                     if (flight.is_extetanl) {
