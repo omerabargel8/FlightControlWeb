@@ -23,6 +23,7 @@ namespace FlightControlWeb.Controllers
         [HttpGet("{id}", Name = "Get")]
         public FlightPlan GetFlightPlanById(string id)
         {
+            //checking if the request ends with & to mark internal flight
             if ((id.Last() == '&'))
             {
                 id = id.Remove(id.Length - 1);

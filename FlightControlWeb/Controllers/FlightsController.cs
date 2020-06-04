@@ -21,6 +21,7 @@ namespace FlightControlWeb.Controllers
         [HttpGet]
         public IEnumerable<Flight> GetAllFlights(string relative_to)
         {
+            //checking if the request contains "sync_all"
             string request = Request.QueryString.Value;
             bool isExternals = request.Contains("sync_all"); 
             return flightsManager.getAllFlights(relative_to, isExternals);

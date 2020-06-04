@@ -11,7 +11,7 @@
     <title>Document</title>
     <link href="css/style.css" rel="stylesheet" type="text/css">
 </head>
-<body>
+<body onload="loadingTable()">
     <div class="container-fluid" style="position:absolute">
         <div class="row">
             <div class="col-md-7">
@@ -59,51 +59,5 @@
             </div>
         </div>
     </div>
-    <script>
-        setInterval(function () {
-            let date = new Date().toISOString().substr(0, 19) + "Z";
-            let flightsUrl = "../api/flights?relative_to=" + date + "&sync_all";
-            $.getJSON(flightsUrl, function (data) {
-                $('#internalBody').empty();
-                $('#externalBody').empty();
-                deleteIrrelevantFlights(data);
-                data.forEach(function (flight) {
-                    addMarker(flight.flight_id, flight.latitude, flight.longitude);
-                    if (flight.is_extetanl) {
-                        if (markedRowId == flight.flight_id)
-                            $("#externalFlightTable").append('<tr onClick="rowClick(this)" style="background-color:aquamarine"><td>' + flight.flight_id + "</td>" + "<td>" + flight.company_name + "</td>" + '></tr>');
-                        else
-                            $("#externalFlightTable").append('<tr onClick="rowClick(this)"><td>' + flight.flight_id + "</td>" + "<td>" + flight.company_name + "</td>" + '></tr>');
-                    } else {
-                        if (markedRowId == flight.flight_id)
-                            $("#internalFlightTable").append('<tr onClick="rowClick(this)" style="background-color:aquamarine"><td>' + flight.flight_id + "</td>" + '<td>' + flight.company_name + "</td>" + "<td>" + '<td><button type="button" class="btn btn-danger" onClick="event.stopPropagation();DeleteFlight(\'' + flight.flight_id + '\')">X</button></td>></tr>');
-                        else 
-                            $("#internalFlightTable").append('<tr onClick="rowClick(this)"><td>' + flight.flight_id + "</td>" + '<td>' + flight.company_name + "</td>" + "<td>" + '<td><button type="button" class="btn btn-danger" onClick="event.stopPropagation();DeleteFlight(\'' + flight.flight_id+ '\')">X</button></td>></tr>');
-
-                    }
-                });
-            });
-
-        }
-            , 1000);
-    </script>
-    <script>
-        (function () {
-            var dropzone = document.getElementById('dropzone');
-            dropzone.ondrop = function (e) {
-                e.preventDefault();
-                this.className = 'dropZone';
-                uploadFiles(e.dataTransfer.files);
-            }
-            dropzone.ondragover = function () {
-                this.className = 'dropZone dragover';
-                return false;
-            }
-            dropzone.ondragleave = function () {
-                this.className = 'dropZone';
-                return false;
-            }
-        }());
-    </script>
 </body>
 </html>
